@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+NAME=${1:-}
+
+
+if [[ -z "$NAME" ]];then
+   echo "$0 <indicator name> [<name> [...]]"
+   exit 1
+fi
+
+FILE=/tmp/indicators.json
+
+if [ ! -f "$FILE" ];then
+    echo '{}' > $FILE
+fi
+
+for NAME in "$@";do
+    flock "$FILE" -c "bash -c '
+      set -euo pipefail
+      new_value=\`jq <\"$FILE\" \"del(.$NAME)\"\`;
+
+      echo \"\$new_value\" >\"$FILE\"
+'"
+done

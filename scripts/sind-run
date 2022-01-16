@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+NAME=${1:-}
+COMMAND=${2:-}
+
+if [[ -z "$NAME" ]] || [[  -z "$COMMAND" ]];then
+   echo "$0 <indicator name> <command>"
+   exit 1
+fi
+
+sind "$NAME" "#0ff"
+
+set +e
+bash -xc "$COMMAND"  # The -x is just my preference :)
+
+RES=$? # Collect the command exit code 
+
+if [ $RES -eq 0 ];then
+    sind "$NAME" "#0f0"  # If OK, show in green
+   
+	# Great place for notify-send/play/gotify
+else
+    sind "$NAME" "#f00"  # If failed, show in red
+	
+	# Great place for notify-send/play/gotify
+fi
+
+exit $RES

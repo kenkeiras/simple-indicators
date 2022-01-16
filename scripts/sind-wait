@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+FILE=/tmp/indicators.json
+
+while [ 1 ];do
+    ready=1
+
+    # Check all indicators on arguments
+	for NAME in "$@";do
+
+		# Get the value of an indicator
+		val=`jq -r <"$FILE" "(.$NAME)"`
+
+        # Check if value is one of the allowed ones
+		# If not green, it's not yet done
+        if [ "$val" != "#00ff00" ];then
+            if [ "$val" != "#0f0" ];then
+                ready=0
+            fi
+        fi
+
+		# If red, it has failed (so the wait finishes with an error).
+        if [ "$val" == "#f00" ];then
+            exit 1
+        fi
+        if [ "$val" == "#ff0000" ];then
+            exit 1
+        fi
+    done
+
+	# If all processes are ready, quit successfully
+    if [ $ready -eq 1 ];then
+        break
+    fi
+
+	# If not all processes are ready, wait for the next file modification
+    inotifywait -q -e modify "$FILE" > /dev/null
+done

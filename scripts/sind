@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+NAME=${1:-}
+COLOR=${2:-}
+
+if [[ -z "$NAME" ]] || [[  -z "$COLOR" ]];then
+   echo "$0 <indicator name> <indicator color>"
+   exit 1
+fi
+
+FILE=/tmp/indicators.json
+
+if [ ! -f "$FILE" ];then
+    echo '{}' > $FILE
+fi
+
+flock "$FILE" -c "bash -c '
+      set -euo pipefail
+      new_value=\`jq <\"$FILE\" \".$NAME=\\\"$COLOR\\\"\"\`;
+
+      echo \"\$new_value\" >\"$FILE\"
+'"
