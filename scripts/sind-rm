@@ -10,13 +10,19 @@ if [[ -z "$NAME" ]];then
    exit 1
 fi
 
+# Define the indicator file
 FILE=/tmp/indicators.json
 
+# Create it if it's empty
 if [ ! -f "$FILE" ];then
     echo '{}' > $FILE
 fi
 
+# For each parameter...
 for NAME in "$@";do
+			   
+	# Lock $FILE and use jq to remove the key with the parameter name
+	# then, write it back
     flock "$FILE" -c "bash -c '
       set -euo pipefail
       new_value=\`jq <\"$FILE\" \"del(.$NAME)\"\`;

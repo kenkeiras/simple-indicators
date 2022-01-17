@@ -12,10 +12,13 @@ fi
 
 FILE=/tmp/indicators.json
 
+# Create it if it's empty
 if [ ! -f "$FILE" ];then
     echo '{}' > $FILE
 fi
 
+# Lock $FILE and use jq to update the $NAME key to the $COLOR value
+# then write the new content to $FILE
 flock "$FILE" -c "bash -c '
       set -euo pipefail
       new_value=\`jq <\"$FILE\" \".$NAME=\\\"$COLOR\\\"\"\`;
